@@ -2,13 +2,33 @@
 # https://www.kaggle.com/startupsci/titanic-data-science-solutions
 
 #%%
+from os import remove
 import pandas as pd
 import numpy as np
 
 # %%
 train = pd.read_csv("data/train.csv")
 test = pd.read_csv("data/test.csv")
+#%%
+
+# This code is written in the temporary variable style
+
+removed_ticket_cabin = train.drop(columns=["Ticket", "Cabin"])
+
+extract_titles = removed_ticket_cabin.assign(Title=lambda df: df.Name.str.extract(' ([A-Za-z]+)\.'), expand=False)
+
+titles1 = extract_titles.assign(Title=lambda df: df.Title.replace(['Lady', 'Countess', 'Capt', 'Col', 'Don', 'Dr', 'Major', 'Rev', 'Sir', 'Jonkheer', 'Dona'], 'Rare'))
+titles2 = titles1.assign(Title=lambda df: df.Title.replace('Mlle', 'Miss'))
+titles3 = titles2.assign(Title=lambda df: df.Title.replace('Ms', 'Miss'))
+titles4 = titles3.assign(Title=lambda df: df.Title.replace('Mme', 'Mrs'))
+
+encoded_titles = titles4.assign(Title=lambda df: df.Title.map({'Mr': 1, 'Miss': 2, 'Mrs': 3, 'Master': 4, 'Rare': 5}))
+encoded_titles_final = encoded_titles.drop(columns=['Name', 'PassengerId'], axis=1)
+
 # %%
+
+# This code is written in the method chaining style
+
 result = \
 (
     train
